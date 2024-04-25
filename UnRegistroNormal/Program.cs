@@ -25,3 +25,5 @@ app.MapRazorComponents<App>()
 	.AddInteractiveServerRenderMode();
 
 app.Run();
+
+// este es un comentario para probar el commit
