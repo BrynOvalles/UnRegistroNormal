@@ -1,10 +1,18 @@
+using Microsoft.EntityFrameworkCore;
 using UnRegistroNormal.Components;
+using UnRegistroNormal.DAL;
+using UnRegistroNormal.Models;
+using UnRegistroNormal.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
 	.AddInteractiveServerComponents();
+
+var ConStr = builder.Configuration.GetConnectionString("ConStr");
+builder.Services.AddDbContext<Contexto>(options => options.UseSqlite(ConStr));
+builder.Services.AddScoped<ClienteServices>();
 
 var app = builder.Build();
 
