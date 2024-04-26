@@ -33,11 +33,11 @@
 
 @code {
 
-    public Clientes clientes { set; get; } = new Clientes();
-    public List<Clientes> Lista_Clientes { set; get; } = new List<Clientes>();
+    public Cliente clientes { set; get; } = new Cliente();
+    public List<Cliente> Lista_Clientes { set; get; } = new List<Cliente>();
 
-    protected override void OnInitialized()
+    protected override async void OnInitialized()
     {
-        Lista_Clientes = clientesServices.Listar(l => true);
+        Lista_Clientes = await clientesServices.Listar(l => true);
     }
 }

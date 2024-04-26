@@ -13,93 +13,124 @@
 			<div class="card-body">
 				<div class="col-xs-12 col-sm-12 col-md-8 col-lg-6 col-xl-4">
 					<label>Cliente ID:</label>
-					<div class="input-group mb-3" >
-						<InputNumber @bind-Value="clientes.ClienteId" class="form-control" aria-describedby="BotonBuscar"/>
+					<div class="input-group mb-3">
+						<InputNumber @bind-Value="clientes.ClienteId" class="form-control" aria-describedby="BotonBuscar" />
 						<button @onclick="Buscar" class="btn btn-outline-primary" type="button" id="BotonBuscar"><i class="bi bi-search" /></button>
 					</div>
 				</div>
-				<div class="mb-3">
-					<label class="form-label" for="Nombre:"> Nombre: </label>
-					<InputText @bind-Value="clientes.Nombre" class="form-control" placeholder="Juan Perez" />
-					<ValidationMessage For="@(() => clientes.Nombre)" />
+				<div class="row">
+					<div class="col-6">
+						<label class="form-label" for="Nombre:"> Nombre: </label>
+						<InputText @bind-Value="clientes.Nombre" class="form-control" placeholder="Juan Perez" />
+						<ValidationMessage For="@(() => clientes.Nombre)" />
+					</div>
+					<div class="col-6">
+						<label class="form-label" for="RNC:"> RNC: </label>
+						<InputText @bind-Value="clientes.RNC" class="form-control" placeholder="402684215" />
+						<ValidationMessage For="@(() => clientes.RNC)" />
+					</div>
 				</div>
-				<div class="mb-0">
-					<label class="form-label" for="RNC:"> RNC: </label>
-					<InputText @bind-Value="clientes.RNC" class="form-control" placeholder="402684215" />
-					<ValidationMessage For="@(() => clientes.RNC)" />
+				<div class="row">
+					<div class="col-6">
+						<label class="form-label" for="Teléfono:"> Teléfono: </label>
+						<InputText @bind-Value="clientes.Telefono" class="form-control" placeholder="8095773744" />
+						<ValidationMessage For="@(() => clientes.Telefono)" />
+					</div>
+					<div class="col-6">
+						<label class="form-label" for="Celular:"> Celular: </label>
+						<InputText @bind-Value="clientes.Celular" class="form-control" placeholder="8098355345" />
+						<ValidationMessage For="@(() => clientes.Celular)" />
+					</div>
 				</div>
-				<div class="mb-3">
-					<label class="form-label" for="Teléfono:"> Teléfono: </label>
-					<InputText @bind-Value="clientes.Telefono" class="form-control" placeholder="8095773744" />
-					<ValidationMessage For="@(() => clientes.Telefono)" />
-				</div>
-				<div class="mb-3">
-					<label class="form-label" for="Celular:"> Celular: </label>
-					<InputText @bind-Value="clientes.Celular" class="form-control" placeholder="8098355345" />
-					<ValidationMessage For="@(() => clientes.Celular)" />
-				</div>
-				<div class="mb-3">
-					<label class="form-label" for="Correo:"> Correo: </label>
-					<InputText @bind-Value="clientes.Email" class="form-control" placeholder="JuanPerez@Juan.Perez" />
-					<ValidationMessage For="@(() => clientes.Email)" />
-				</div>
-				<div class="mb-3">
-					<label class="form-label" for="Dirección:"> Dirección: </label>
-					<InputText @bind-Value="clientes.Dirección" class="form-control" placeholder="Salcedo, Calle Mella #28" />
-					<ValidationMessage For="@(() => clientes.Dirección)" />
+
+				<div class="row">
+					<div class="col-6">
+						<label class="form-label" for="Correo:"> Correo: </label>
+						<InputText @bind-Value="clientes.Email" class="form-control" placeholder="JuanPerez@Juan.Perez" />
+						<ValidationMessage For="@(() => clientes.Email)" />
+					</div>
+					<div class="col-6">
+						<label class="form-label" for="Dirección:"> Dirección: </label>
+						<InputText @bind-Value="clientes.Dirección" class="form-control" placeholder="Salcedo, Calle Mella #28" />
+						<ValidationMessage For="@(() => clientes.Dirección)" />
+					</div>
 				</div>
 				<div class="card-footer d-flex justify-content-center">
 					<div class="btn-group">
-						<button type="button" class="bi bi-file-earmark-plus btn btn-outline-primary" @onclick="Nuevo">Nuevo </button>
-						<button type="submit" class="bi bi-floppy2-fill btn btn-outline-success">Guardar </button>
-						<button type="button" class="bi bi-trash3 btn btn-outline-danger" @onclick="Eliminar">Eliminar </button>
+						<button type="button" class="bi bi-file-earmark-plus btn btn-outline-primary" @onclick="Nuevo"> Nuevo </button>
+						<button type="submit" class="bi bi-floppy2-fill btn btn-outline-success"> Guardar </button>
+						<button type="button" class="bi bi-trash3 btn btn-outline-danger" @onclick="Eliminar"> Eliminar </button>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
-</EditForm>		
+</EditForm>
 @Mensaje
 
-@code{
+@code {
 	[Parameter]
 	public int? ClienteID { get; set; }
-	public Clientes clientes { set; get; } = new Clientes();
+	public Cliente clientes { set; get; } = new Cliente();
 	public string Mensaje { get; set; } = string.Empty;
 	bool clienteExiste = false;
-	
-	public bool Validar()
+
+	protected override async Task OnInitializedAsync()
 	{
-		clienteExiste = (clienteServices.Listar(c =>
-			c.Nombre!.ToLower() == clientes.Nombre!.ToLower()
-			|| c.RNC == clientes.RNC).Any());
-		return clienteExiste;
+		if (ClienteID != null)
+		{
+			clientes = await clienteServices.Buscar(ClienteID.Value);
+			if (clientes != null)
+			{
+				clienteExiste = true;
+				Mensaje = "Cliente Encontrado";
+			}
+			else
+				Mensaje = "No se encontro el Cliente";
+		}
 	}
+
+	public async Task Validar()
+	{
+		if (clienteExiste)
+		{
+			await clienteServices.Guardar(clientes);
+			Mensaje = "Se guardó correctamente el cliente.";
+		}
+		else
+		{
+			Mensaje = "No se pudo guardar el cliente. Intente nuevamente.";
+		}
+	}
+
+	public async Task Guardar()
+	{
+		if (clienteExiste)
+		{
+			await clienteServices.Modificar(clientes);
+			Mensaje = "Se actualizó correctamente el cliente.";
+		}
+		else
+		{
+			await clienteServices.Guardar(clientes);
+			Mensaje = "Se guardó correctamente el cliente.";
+		}
+	}
+
 	public async Task Buscar()
-	{	var encontrado = await clienteServices.Buscar(clientes.ClienteId);
-		if (encontrado != null){
-			clientes = encontrado; 
+	{
+		var encontrado = await clienteServices.Buscar(clientes.ClienteId);
+		if (encontrado != null)
+		{
+			clientes = encontrado;
 			Mensaje = "Cliente Encontrado";
 		}
 		else
 			Mensaje = "No se encontro el Cliente";
 	}
-	public async Task Guardar()
-	{
-		if (!Validar() && await clienteServices.Guardar(clientes))
-		{
-			Nuevo();
-			Mensaje = "Se guardó correctamente el cliente.";
-		}
-		else
-		{
-			Nuevo();
-			Mensaje = "No se pudo guardar el cliente. Intente nuevamente.";
-		}
-	}
 	public void Nuevo()
 	{
-		this.clientes= new Clientes();
+		this.clientes = new Cliente();
 		Mensaje = string.Empty;
 	}
 	public async Task Eliminar()
